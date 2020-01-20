@@ -1,0 +1,164 @@
+openapi: 3.0.0
+x-navigateMethodsByName: true
+servers:
+  - url: /rnaget
+info:
+  title: RNAget API
+  description: Retrieve expression matrices from RNAseq experiments
+  version: 1.0.0
+  contact:
+    name: GA4GH RNA-seq Working Group
+    email: ga4gh-rnaseq@ga4gh.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/ga4gh-rnaseq/schema/blob/master/LICENSE
+basePath: /rnaget
+externalDocs:
+  description: Find out more about GA4GH
+  url: http://ga4gh.org
+tags:
+  - name: projects
+    description: Retrieve information about projects
+paths:
+  "/projects/{projectId}":
+    get:
+      tags:
+        - projects
+      summary: Get a single project by ID
+      description: Returns the project matching the provided ID
+      operationId: getProjectById
+      parameters:
+        - name: projectId
+          in: path
+          description: ID of project to return
+          required: true
+          schema:
+            type: string
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/project"
+        "400":
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "404":
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+      security:
+        - rnaget_auth:
+            - read:project
+  /projects:
+    get:
+      tags:
+        - projects
+      summary: Returns a list of projects matching filters
+      description: Get a list of projects matching filters
+      operationId: getProjects
+      parameters:
+        # - $ref: "#/components/parameters/versionParam"
+        - name: version
+          in: query
+          description: version to filter by
+          required: false
+          schema:
+            type: string
+          example: 1.0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/project"
+        "400":
+          description: The requested data format is not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "406":
+          description: Requested formatting not supported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+        "501":
+          description: The specified request is not supported by the server
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+      security:
+        - rnaget_auth:
+            - read:project
+components:
+  schemas:
+    project:
+      type: object
+      description: The project is the top level of the model hierarchy and contains one or more studies.
+      properties:
+        id:
+          type: string
+          description: A unique identifier assigned to this object
+          example: c2fe2aa6ad3043108bd88a30fc0303da
+        version:
+          type: string
+          description: Version number of the object
+          example: 1.0
+        name:
+          type: string
+          description: Short, readable name
+          example: Demo Project
+        description:
+          type: string
+          description: Detailed description of the object
+          example: This is a small project to demo API funtions
+      required:
+      - id
+      externalDocs:
+        description: Find out more
+        url: https://github.com/ga4gh-rnaseq/schema
+    error:
+      type: object
+      description: General API error model
+      properties:
+        message:
+          type: string
+          description: Error message details
+  parameters:
+    versionParam:
+      title: versionParam
+      name: version
+      in: query
+      description: version to filter by
+      required: false
+      schema:
+        type: string
+      example: 1.0
